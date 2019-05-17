@@ -10,6 +10,8 @@ function watchForm() {
         let stateSearch = $("#js-state-search").val();
         let maxResults = $("#js-max-results").val();
 
+        $(".js-err-message").empty();
+
         getParks(stateSearch, maxResults);
     });
 }
@@ -23,8 +25,9 @@ function formatParameters(params) {
 function getParks(stateSearch, maxResults) {
     const params = {
         stateCode: stateSearch,
-        limit: maxResults,
-        //api_key: apiKey
+        limit: maxResults-1,
+        //api_key: apiKey,
+        fields: 'addresses'
     };
 
     let paramString = formatParameters(params);
@@ -32,9 +35,7 @@ function getParks(stateSearch, maxResults) {
 
     const options = {
         headers: new Headers({
-            "X-Api-Key": apiKey,
-            'Access-Control-Allow-Headers': "*",
-            'Access-Control-Allow-Origin': "*"})
+            "X-Api-Key": apiKey})
     };
 
     fetch(url, options)
@@ -44,8 +45,7 @@ function getParks(stateSearch, maxResults) {
           }
           throw new Error();
         })
-      //.then(console.log)
-      .then(reponseJson => displayResults(responseJson))
+      .then(responseJson => displayResults(responseJson))
       .catch(err => {
           $(".js-err-message").text(`Something went wrong`);
       });
@@ -53,6 +53,31 @@ function getParks(stateSearch, maxResults) {
 
 function displayResults(responseJson) {
     console.log(responseJson);
-}
+
+    $('.js-results-list').empty();
+
+    if (responseJson.data.length === 0) {
+        $(".js-err-message").text(`Invalid State Code, try again`);
+        $('.result-container').addClass('hidden');
+    } else {
+        $('.result-container').removeClass('hidden');
+    };
+
+    for (let i = 0; i < responseJson.data.length; i++) {
+        $(".js-results-list").append(`
+            <li>
+                <h3>${responseJson.data[i].fullName}</h3> 
+                <p>${responseJson.data[i].description}</p>
+                <p>Address:<br>
+                    ${responseJson.data[i].addresses[1].line1}<br>
+                    ${responseJson.data[i].addresses[1].city}, ${responseJson.data[i].addresses[1].stateCode} ${responseJson.data[i].addresses[1].postalCode}</p> 
+                <p><a href="${responseJson.data[i].url}" target="_blank">Go to site</a></p>
+            </li>
+        `)
+
+    }
+
+    
+} 
 
 watchForm();

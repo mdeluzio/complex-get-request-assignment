@@ -9,3 +9,7 @@
 .err-message {
     color: red;
 }
+
+li {
+    border-bottom: solid black 1px;
+}
