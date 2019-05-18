@@ -13,3 +13,11 @@
 li {
     border-bottom: solid black 1px;
 }
+
+label {
+    display: block;
+}
+
+input {
+    margin-bottom: 30px;
+}

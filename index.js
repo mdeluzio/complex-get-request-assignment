@@ -7,7 +7,7 @@ const searchUrl = 'https://developer.nps.gov/api/v1/parks';
 function watchForm() {
     $("form").submit(function(event) {
         event.preventDefault();
-        let stateSearch = $("#js-state-search").val();
+        let stateSearch = $("#js-state-search").val().replace(/\s/g, "");
         let maxResults = $("#js-max-results").val();
 
         $(".js-err-message").empty();
@@ -26,19 +26,15 @@ function getParks(stateSearch, maxResults) {
     const params = {
         stateCode: stateSearch,
         limit: maxResults-1,
-        //api_key: apiKey,
+        api_key: apiKey,
         fields: 'addresses'
     };
 
     let paramString = formatParameters(params);
     let url = searchUrl + '?' + paramString;
 
-    const options = {
-        headers: new Headers({
-            "X-Api-Key": apiKey})
-    };
 
-    fetch(url, options)
+    fetch(url)
       .then(response => {
           if (response.ok) {
               return response.json();
@@ -47,6 +43,7 @@ function getParks(stateSearch, maxResults) {
         })
       .then(responseJson => displayResults(responseJson))
       .catch(err => {
+          console.log(err)
           $(".js-err-message").text(`Something went wrong`);
       });
 }
@@ -69,8 +66,10 @@ function displayResults(responseJson) {
                 <h3>${responseJson.data[i].fullName}</h3> 
                 <p>${responseJson.data[i].description}</p>
                 <p>Address:<br>
-                    ${responseJson.data[i].addresses[1].line1}<br>
-                    ${responseJson.data[i].addresses[1].city}, ${responseJson.data[i].addresses[1].stateCode} ${responseJson.data[i].addresses[1].postalCode}</p> 
+                    ${responseJson.data[i].addresses.length > 1 && responseJson.data[i].addresses[1].line1}<br>
+                    ${responseJson.data[i].addresses.length > 1 && responseJson.data[i].addresses[1].city}, 
+                    ${responseJson.data[i].addresses.length > 1 && responseJson.data[i].addresses[1].stateCode} 
+                    ${responseJson.data[i].addresses.length > 1 && responseJson.data[i].addresses[1].postalCode}</p> 
                 <p><a href="${responseJson.data[i].url}" target="_blank">Go to site</a></p>
             </li>
         `)
